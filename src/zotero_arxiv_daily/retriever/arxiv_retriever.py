@@ -11,10 +11,39 @@ import os
 from queue import Empty
 from time import sleep
 from typing import Any, Callable, TypeVar
+from dataclasses import dataclass
 from loguru import logger
 import requests
 
 T = TypeVar("T")
+
+
+@dataclass
+class RssAuthor:
+    name: str
+
+
+@dataclass
+class RssArxivResult:
+    title: str
+    authors: list[RssAuthor]
+    summary: str
+    pdf_url: str
+    entry_id: str
+
+    def source_url(self) -> str:
+        return self.entry_id.replace("/abs/", "/e-print/")
+
+
+def _result_from_rss(entry: Any) -> RssArxivResult:
+    abstract = entry.summary.split("Abstract:", 1)[-1].strip()
+    return RssArxivResult(
+        title=entry.title,
+        authors=[RssAuthor(name.strip()) for name in entry.get("author", "").split(",") if name.strip()],
+        summary=abstract,
+        pdf_url=entry.link.replace("/abs/", "/pdf/"),
+        entry_id=entry.link,
+    )
 
 DOWNLOAD_TIMEOUT = (10, 60)
 PDF_EXTRACT_TIMEOUT = 180
@@ -130,6 +159,11 @@ class ArxivRetriever(BaseRetriever):
         ]
         if self.config.executor.debug:
             all_paper_ids = all_paper_ids[:10]
+        rss_entries = {
+            entry.id.removeprefix("oai:arXiv.org:"): entry
+            for entry in feed.entries
+            if entry.id.removeprefix("oai:arXiv.org:") in all_paper_ids
+        }
 
         # Get full information of each paper from arxiv api
         bar = tqdm(total=len(all_paper_ids))
@@ -148,6 +182,12 @@ class ArxivRetriever(BaseRetriever):
                         wait = batch_retry_delay * (attempt + 1)
                         logger.warning(f"arXiv API 429 on batch {i // 20}, retry {attempt + 1}/{max_batch_retries} in {wait}s")
                         sleep(wait)
+                    elif exc.status == 406:
+                        logger.warning(f"arXiv API 406 on batch {i // 20}; using RSS metadata")
+                        fallback = [_result_from_rss(rss_entries[paper_id]) for paper_id in all_paper_ids[i:i + 20]]
+                        raw_papers.extend(fallback)
+                        bar.update(len(fallback))
+                        break
                     else:
                         raise
             if i + 20 < len(all_paper_ids):
