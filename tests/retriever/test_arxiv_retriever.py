@@ -4,6 +4,7 @@ import time
 from types import SimpleNamespace
 
 import feedparser
+import arxiv
 
 from zotero_arxiv_daily.retriever.arxiv_retriever import ArxivRetriever, _run_with_hard_timeout
 import zotero_arxiv_daily.retriever.arxiv_retriever as arxiv_retriever
@@ -61,6 +62,31 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
 
     assert len(papers) == len(new_entries)
     assert set(p.title for p in papers) == set(e.title for e in new_entries)
+
+
+def test_arxiv_406_uses_rss_metadata(config, mock_feedparser, monkeypatch):
+    """A rejected batch must not discard papers already present in the RSS feed."""
+    class RejectingClient:
+        def __init__(self, **kwargs):
+            pass
+
+        def results(self, search):
+            raise arxiv.HTTPError("https://export.arxiv.org/api/query", 1, 406)
+
+    monkeypatch.setattr(arxiv_retriever.arxiv, "Client", RejectingClient)
+    monkeypatch.setattr(arxiv_retriever, "sleep", lambda _: None)
+
+    papers = ArxivRetriever(config)._retrieve_raw_papers()
+    expected = [
+        entry for entry in mock_feedparser.entries
+        if entry.get("arxiv_announce_type", "new") == "new"
+    ]
+    assert len(papers) == len(expected)
+    assert papers[0].title == expected[0].title
+    assert papers[0].summary == expected[0].summary.split("Abstract:", 1)[1].strip()
+    assert papers[0].authors[0].name == expected[0].dc_creator.split(",", 1)[0]
+    assert papers[0].entry_id == expected[0].link
+    assert papers[0].pdf_url == expected[0].link.replace("/abs/", "/pdf/")
 
 
 def test_run_with_hard_timeout_returns_value():
