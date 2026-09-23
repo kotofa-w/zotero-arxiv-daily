@@ -39,7 +39,7 @@ def _result_from_rss(entry: Any) -> RssArxivResult:
     abstract = entry.summary.split("Abstract:", 1)[-1].strip()
     return RssArxivResult(
         title=entry.title,
-        authors=[RssAuthor(name.strip()) for name in entry.get("dc_creator", "").split(",") if name.strip()],
+        authors=[RssAuthor(name.strip()) for name in entry.get("author", "").split(",") if name.strip()],
         summary=abstract,
         pdf_url=entry.link.replace("/abs/", "/pdf/"),
         entry_id=entry.link,

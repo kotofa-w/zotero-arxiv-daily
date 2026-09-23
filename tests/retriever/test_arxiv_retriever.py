@@ -84,7 +84,7 @@ def test_arxiv_406_uses_rss_metadata(config, mock_feedparser, monkeypatch):
     assert len(papers) == len(expected)
     assert papers[0].title == expected[0].title
     assert papers[0].summary == expected[0].summary.split("Abstract:", 1)[1].strip()
-    assert papers[0].authors[0].name == expected[0].dc_creator.split(",", 1)[0]
+    assert papers[0].authors[0].name == expected[0].author.split(",", 1)[0]
     assert papers[0].entry_id == expected[0].link
     assert papers[0].pdf_url == expected[0].link.replace("/abs/", "/pdf/")
 
