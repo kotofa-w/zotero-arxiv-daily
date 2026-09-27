@@ -1,6 +1,11 @@
 name: Test
 on:
   workflow_dispatch:
+    inputs:
+      preview_classics:
+        description: Send a classics preview without advancing its history
+        type: boolean
+        default: false
 
 jobs:
   calculate-and-send:
@@ -13,7 +18,7 @@ jobs:
       #    ref: ${{ vars.REF }}
 
       - name: Checkout classics state for preview
-        if: ${{ vars.CLASSICS_ENABLED == 'true' }}
+        if: ${{ inputs.preview_classics }}
         uses: actions/checkout@v6
         with:
           ref: classics-state
@@ -33,7 +38,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
           CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG }}
-          CLASSICS_ENABLED: ${{ vars.CLASSICS_ENABLED || 'false' }}
+          CLASSICS_ENABLED: ${{ inputs.preview_classics && 'true' || 'false' }}
         run: |
           export DEBUG=true
           printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
