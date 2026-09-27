@@ -1,6 +1,7 @@
 """Tests for zotero_arxiv_daily.construct_email: render_email, get_stars, get_block_html."""
 
 from zotero_arxiv_daily.construct_email import render_email, get_stars, get_block_html, get_empty_html
+from zotero_arxiv_daily.daily_classics import ClassicPaper
 from tests.canned_responses import make_sample_paper
 
 
@@ -15,6 +16,15 @@ def test_render_email_with_papers():
 def test_render_email_empty_list():
     html = render_email([])
     assert "No Papers Today" in html
+
+
+def test_render_email_classic_without_new_papers():
+    classic = ClassicPaper("circuits", "04 circuits", "Adder <chip>", "A; B", 1982,
+                           "IEEE", "10.1/adder", "https://doi.org/10.1/adder")
+    html = render_email([], classic)
+    assert "学科经典" in html
+    assert "Adder &lt;chip&gt;" in html
+    assert "No Papers Today" not in html
 
 
 def test_render_email_author_truncation():

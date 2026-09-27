@@ -65,6 +65,28 @@ def test_rerank_single_candidate_single_corpus():
     assert ranked[0].score is not None
 
 
+def test_classic_seeds_have_bounded_weight_and_do_not_change_personal_decay():
+    corpus = make_sample_corpus(2)
+    seeds = make_sample_corpus(6)
+    papers = [make_sample_paper(title="Personal"), make_sample_paper(title="Classic")]
+    sim = np.array([
+        [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    ])
+    ranked = StubReranker(sim).rerank(papers, corpus, seeds)
+    assert ranked[0].title == "Personal"
+    assert papers[0].score == pytest.approx(8.5)
+    assert papers[1].score == pytest.approx(1.5)
+
+
+def test_classic_seed_cold_start_and_no_seed_baseline():
+    corpus = make_sample_corpus(1)
+    seeds = make_sample_corpus(2)
+    papers = [make_sample_paper()]
+    assert StubReranker(np.array([[0.2]])).rerank(papers, corpus)[0].score == pytest.approx(2.0)
+    assert StubReranker(np.array([[0.4, 0.8]])).rerank(papers, [], seeds)[0].score == pytest.approx(6.0)
+
+
 def test_get_reranker_cls_unknown():
     with pytest.raises(ValueError, match="not found"):
         get_reranker_cls("nonexistent_reranker_xyz")

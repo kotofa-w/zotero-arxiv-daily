@@ -1,4 +1,6 @@
 from .protocol import Paper
+from .daily_classics import ClassicPaper
+from html import escape
 import math
 
 
@@ -104,9 +106,24 @@ def get_stars(score:float):
         return '<div class="star-wrapper">'+full_star * full_star_num + half_star * half_star_num + '</div>'
 
 
-def render_email(papers:list[Paper]) -> str:
+def get_classic_html(classic: ClassicPaper) -> str:
+    title = escape(classic.title)
+    authors = escape(classic.authors.replace("; ", ", "))
+    venue = escape(classic.venue)
+    area = escape(classic.area)
+    url = escape(classic.url, quote=True)
+    return (
+        '<section style="font-family: Arial, sans-serif; border: 1px solid #ddd; '
+        'border-radius: 8px; padding: 16px; margin-top: 20px">'
+        '<h2>学科经典</h2>'
+        f'<h3>{title}</h3><p>{authors} · {classic.year} · {venue}</p>'
+        f'<p>{area}</p><a href="{url}">阅读原文</a></section>'
+    )
+
+
+def render_email(papers:list[Paper], classic: ClassicPaper | None = None) -> str:
     parts = []
-    if len(papers) == 0 :
+    if len(papers) == 0 and classic is None:
         return framework.replace('__CONTENT__', get_empty_html())
     
     for p in papers:
@@ -127,5 +144,9 @@ def render_email(papers:list[Paper]) -> str:
             affiliations = 'Unknown Affiliation'
         parts.append(get_block_html(p.title, authors, rate, p.tldr, p.pdf_url, affiliations))
 
-    content = '<br>' + '</br><br>'.join(parts) + '</br>'
+    content = '<br>' + '</br><br>'.join(parts) + '</br>' if parts else ''
+    if classic is not None:
+        if parts:
+            content = '<h2>今日新论文</h2>' + content
+        content += get_classic_html(classic)
     return framework.replace('__CONTENT__', content)

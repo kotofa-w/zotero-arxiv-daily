@@ -52,3 +52,11 @@ executor:
   max_paper_num: 100 # The maximum number of the papers presented in the email. Example: 100
   source: ??? # The sources of papers to retrieve. Example: ['arxiv','biorxiv','medrxiv','chemrxiv']
   reranker: local # The reranker to use. Example: 'local' or 'api'
+
+classics:
+  enabled: ${oc.env:CLASSICS_ENABLED,false} # Disabled unless explicitly enabled for a prepared state branch.
+  catalog_path: classics/verified_review.csv
+  state_path: classics-state/daily_classics.json
+  collection_path: 学科经典 # All items in this collection and its descendants are excluded from personal reading scores.
+  interest_seed_path: 学科经典/兴趣种子 # Only items directly in this collection with original abstracts influence ranking.
+  interest_seed_weight: 0.15 # Maximum classic contribution when personal reading papers exist.

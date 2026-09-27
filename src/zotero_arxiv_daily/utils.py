@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 from loguru import logger
 import datetime
+from zoneinfo import ZoneInfo
 from omegaconf import DictConfig
 import pymupdf
 import pymupdf.layout
@@ -139,7 +140,7 @@ def glob_match(path:str, pattern:str) -> bool:
     re_pattern = glob.translate(pattern,recursive=True)
     return re.match(re_pattern, path) is not None
 
-def send_email(config:DictConfig, html:str):
+def send_email(config:DictConfig, html:str, has_classic:bool=False):
     sender = config.email.sender
     receiver = config.email.receiver
     password = config.email.sender_password
@@ -152,8 +153,9 @@ def send_email(config:DictConfig, html:str):
     msg = MIMEText(html, 'html', 'utf-8')
     msg['From'] = _format_addr('Github Action <%s>' % sender)
     msg['To'] = _format_addr('You <%s>' % receiver)
-    today = datetime.datetime.now().strftime('%Y/%m/%d')
-    msg['Subject'] = Header(f'Daily arXiv {today}', 'utf-8').encode()
+    today = datetime.datetime.now(ZoneInfo('Asia/Hong_Kong')).strftime('%Y/%m/%d')
+    subject = 'Daily arXiv & Classics' if has_classic else 'Daily arXiv'
+    msg['Subject'] = Header(f'{subject} {today}', 'utf-8').encode()
 
     try:
         server = smtplib.SMTP(smtp_server, smtp_port)
@@ -166,6 +168,13 @@ def send_email(config:DictConfig, html:str):
             logger.debug(f"Failed to use SSL. {e}\nTry to use plain text.")
             server = smtplib.SMTP(smtp_server, smtp_port)
 
-    server.login(sender, password)
-    server.sendmail(sender, [receiver], msg.as_string())
-    server.quit()
+    try:
+        server.login(sender, password)
+        refused = server.sendmail(sender, [receiver], msg.as_string())
+        if refused:
+            raise RuntimeError("SMTP rejected the configured receiver")
+    finally:
+        try:
+            server.quit()
+        except Exception as exc:
+            logger.warning(f"SMTP QUIT failed after send attempt: {exc}")
