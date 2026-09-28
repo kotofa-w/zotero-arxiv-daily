@@ -137,6 +137,7 @@ def test_classic_only_email_advances_after_smtp_acceptance(config, monkeypatch, 
     executor.filter_corpus = lambda corpus: corpus
     executor.retrievers = {}
     monkeypatch.setenv("GITHUB_EVENT_NAME", "schedule")
+    monkeypatch.setattr("zotero_arxiv_daily.executor.load_classic_guide", lambda *args: "<p>Guide</p>")
 
     def reject(*args, **kwargs):
         raise RuntimeError("SMTP failed")
