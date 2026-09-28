@@ -6,9 +6,14 @@ on:
         description: Send a classics preview without advancing its history
         type: boolean
         default: false
+      preview_daily_reading:
+        description: Generate one daily translation and guide artifact without sending email
+        type: boolean
+        default: false
 
 jobs:
   calculate-and-send:
+    if: ${{ !inputs.preview_daily_reading && (inputs.preview_classics || github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,3 +50,25 @@ jobs:
           echo "Use custom config: "
           cat config/custom.yaml
           uv run src/zotero_arxiv_daily/main.py
+
+  daily-reading-preview:
+    if: ${{ inputs.preview_daily_reading && !inputs.preview_classics }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7.1.4
+      - name: Generate daily reading without email
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
+          CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG }}
+        run: |
+          printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
+          uv run python -m zotero_arxiv_daily.preview_daily_reading
+      - name: Save HTML preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-reading-preview
+          path: daily-reading-preview.html

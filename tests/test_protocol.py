@@ -116,6 +116,19 @@ def test_daily_reading_falls_back_per_paper_on_invalid_response(llm_params):
     assert paper.abstract_zh is None and paper.guide is None
 
 
+def test_daily_reading_uses_abstract_when_full_text_cannot_be_encoded(llm_params):
+    from types import SimpleNamespace
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
+        create=lambda **kwargs: SimpleNamespace(choices=[SimpleNamespace(
+            message=SimpleNamespace(content='{"abstract_zh":"译文","guide":"导读"}'))])
+    )))
+    paper = make_sample_paper(full_text=object())
+    paper.generate_reading(client, llm_params)
+    assert paper.abstract_zh == "译文"
+    assert paper.guide_basis == "摘要"
+
+
 # ---------------------------------------------------------------------------
 # generate_affiliations
 # ---------------------------------------------------------------------------

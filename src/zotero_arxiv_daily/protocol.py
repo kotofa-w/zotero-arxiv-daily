@@ -61,10 +61,13 @@ class Paper:
         prompt = f"Title: {self.title}\n\nOriginal abstract:\n{self.abstract}\n"
         basis = "摘要"
         if self.full_text:
-            enc = tiktoken.encoding_for_model("gpt-4o")
-            preview = enc.decode(enc.encode(self.full_text)[:2000])
-            prompt += f"\nBeginning of full text (excerpt only):\n{preview}\n"
-            basis = "摘要与正文节选"
+            try:
+                enc = tiktoken.encoding_for_model("gpt-4o")
+                preview = enc.decode(enc.encode(self.full_text)[:2000])
+                prompt += f"\nBeginning of full text (excerpt only):\n{preview}\n"
+                basis = "摘要与正文节选"
+            except Exception as e:
+                logger.warning(f"Could not include full-text excerpt of {self.url}: {e}")
         prompt += (
             "\nReturn only a JSON object with two nonempty string fields: "
             "abstract_zh and guide. Translate the complete original abstract faithfully "
