@@ -133,6 +133,28 @@ def test_send_email_starttls_success(config, monkeypatch):
     assert "text/html" in body
 
 
+def test_send_email_rejected_receiver_is_failure(config, monkeypatch):
+    class RejectingSMTP:
+        def __init__(self, *args, **kwargs):
+            self.closed = False
+
+        def starttls(self):
+            pass
+
+        def login(self, *args):
+            pass
+
+        def sendmail(self, sender, recipients, message):
+            return {recipients[0]: (550, "rejected")}
+
+        def quit(self):
+            self.closed = True
+
+    monkeypatch.setattr(smtplib, "SMTP", RejectingSMTP)
+    with pytest.raises(RuntimeError, match="rejected"):
+        send_email(config, "<html>classic</html>", has_classic=True)
+
+
 def test_send_email_falls_back_to_ssl(config, monkeypatch):
     sent = []
     call_count = {"smtp": 0}

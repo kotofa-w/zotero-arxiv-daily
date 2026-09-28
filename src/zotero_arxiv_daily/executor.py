@@ -5,9 +5,14 @@ from .utils import glob_match
 from .retriever import get_retriever_cls
 from .protocol import CorpusPaper
 import random
+import os
 from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 from .reranker import get_reranker_cls
 from .construct_email import render_email
+from .daily_classics import advance_state, load_catalog, load_state, save_state, select_classic
+from .classic_guide import load_classic_guide
 from .utils import send_email
 from openai import OpenAI
 from tqdm import tqdm
@@ -89,15 +94,53 @@ class Executor:
             logger.info(f"Selected {len(corpus)} zotero papers:\n{samples}\n...")
         return corpus
 
+    def split_classic_corpus(self, corpus:list[CorpusPaper]) -> tuple[list[CorpusPaper], list[CorpusPaper]]:
+        classics = self.config.get("classics")
+        if not classics or not classics.get("collection_path"):
+            return corpus, []
+        collection_path = str(classics.collection_path).strip("/")
+        seed_path = str(classics.get("interest_seed_path") or "").strip("/")
+        if seed_path and not seed_path.startswith(collection_path + "/"):
+            raise ValueError("classics.interest_seed_path must be inside classics.collection_path")
+        personal = []
+        seeds = []
+        for paper in corpus:
+            if seed_path and seed_path in paper.paths and paper.abstract and paper.abstract.strip():
+                seeds.append(paper)
+            if not any(path == collection_path or path.startswith(collection_path + "/") for path in paper.paths):
+                personal.append(paper)
+        return personal, seeds
+
     
     def run(self):
-        corpus = self.fetch_zotero_corpus()
+        classic = None
+        classic_guide_html = None
+        classic_context = None
+        classic_config = self.config.get("classics")
+        enabled = classic_config and str(classic_config.get("enabled", False)).lower() == "true"
+        if enabled:
+            if not classic_config.get("state_path"):
+                raise ValueError("classics.state_path is required when classics are enabled")
+            root = Path(__file__).resolve().parents[2]
+            catalog_path = root / classic_config.catalog_path
+            state_path = root / classic_config.state_path
+            catalog = load_catalog(catalog_path)
+            history = load_state(state_path)
+            classic = select_classic(catalog, [entry["key"] for entry in history])
+            if classic is not None:
+                classic_guide_html = load_classic_guide(
+                    classic, root / "classics/guides/manifest.csv"
+                )
+            classic_context = (catalog, history, state_path)
+
+        corpus, classic_seeds = self.split_classic_corpus(self.fetch_zotero_corpus())
         corpus = self.filter_corpus(corpus)
-        if len(corpus) == 0:
-            logger.error(f"No zotero papers found. Please check your zotero settings:\n{self.config.zotero}")
-            return
+        if not corpus and not classic_seeds:
+            logger.error("No Zotero papers found. Check the Zotero ID and collection filters.")
+            if classic is None:
+                return
         all_papers = []
-        for source, retriever in self.retrievers.items():
+        for source, retriever in (self.retrievers.items() if corpus or classic_seeds else []):
             logger.info(f"Retrieving {source} papers...")
             papers = retriever.retrieve_papers()
             if len(papers) == 0:
@@ -109,16 +152,28 @@ class Executor:
         reranked_papers = []
         if len(all_papers) > 0:
             logger.info("Reranking papers...")
-            reranked_papers = self.reranker.rerank(all_papers, corpus)
+            classic_weight = float(classic_config.get("interest_seed_weight", 0.15)) if classic_config else 0.15
+            reranked_papers = self.reranker.rerank(all_papers, corpus, classic_seeds, classic_weight)
             reranked_papers = reranked_papers[:self.config.executor.max_paper_num]
             logger.info("Generating TLDR and affiliations...")
             for p in tqdm(reranked_papers):
-                p.generate_tldr(self.openai_client, self.config.llm)
+                p.generate_reading(self.openai_client, self.config.llm)
                 p.generate_affiliations(self.openai_client, self.config.llm)
-        elif not self.config.executor.send_empty:
+        elif not self.config.executor.send_empty and classic is None:
             logger.info("No new papers found. No email will be sent.")
             return
         logger.info("Sending email...")
-        email_content = render_email(reranked_papers)
-        send_email(self.config, email_content)
-        logger.info("Email sent successfully")
+        email_content = render_email(reranked_papers, classic, classic_guide_html)
+        if classic is not None:
+            logger.info(f"Selected classic: {classic.doi or classic.url}")
+        send_email(self.config, email_content, has_classic=classic is not None)
+        logger.info("Email accepted by SMTP")
+        if classic is not None and os.environ.get("GITHUB_EVENT_NAME") == "schedule":
+            catalog, history, state_path = classic_context
+            try:
+                send_date = datetime.now(ZoneInfo("Asia/Hong_Kong")).date()
+                updated = advance_state(catalog, history, classic, send_date)
+                save_state(state_path, updated)
+            except Exception:
+                logger.error(f"SMTP accepted but classics state was not saved. DOI: {classic.doi or classic.url}")
+                raise

@@ -1,6 +1,7 @@
 """Tests for zotero_arxiv_daily.construct_email: render_email, get_stars, get_block_html."""
 
 from zotero_arxiv_daily.construct_email import render_email, get_stars, get_block_html, get_empty_html
+from zotero_arxiv_daily.daily_classics import ClassicPaper
 from tests.canned_responses import make_sample_paper
 
 
@@ -15,6 +16,15 @@ def test_render_email_with_papers():
 def test_render_email_empty_list():
     html = render_email([])
     assert "No Papers Today" in html
+
+
+def test_render_email_classic_without_new_papers():
+    classic = ClassicPaper("circuits", "04 circuits", "Adder <chip>", "A; B", 1982,
+                           "IEEE", "10.1/adder", "https://doi.org/10.1/adder")
+    html = render_email([], classic)
+    assert "学科经典" in html
+    assert "Adder &lt;chip&gt;" in html
+    assert "No Papers Today" not in html
 
 
 def test_render_email_author_truncation():
@@ -71,6 +81,16 @@ def test_get_block_html_contains_all_fields():
     assert "Summary" in html
     assert "http://pdf.url" in html
     assert "MIT" in html
+
+
+def test_render_daily_guide_escapes_model_content():
+    paper = make_sample_paper(tldr="fallback", abstract_zh="译文 <tag>",
+                              guide="方法 **与** <script>", guide_basis="摘要")
+    html = render_email([paper])
+    assert "译文 &lt;tag&gt;" in html
+    assert "&lt;script&gt;" in html
+    assert "<script>" not in html
+    assert "导读（依据摘要）" in html
 
 
 def test_get_empty_html():

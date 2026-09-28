@@ -4,12 +4,25 @@ on:
   schedule:
     - cron: '0 22 * * *'
 
+concurrency:
+  group: daily-paper-email
+  cancel-in-progress: false
+
 jobs:
   calculate-and-send:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Checkout classics state
+        if: ${{ vars.CLASSICS_ENABLED == 'true' }}
+        uses: actions/checkout@v6
+        with:
+          ref: classics-state
+          path: classics-state
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
@@ -24,8 +37,21 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_API_BASE: ${{ secrets.OPENAI_API_BASE }}
           CUSTOM_CONFIG: ${{ vars.CUSTOM_CONFIG }}
+          CLASSICS_ENABLED: ${{ vars.CLASSICS_ENABLED || 'false' }}
         run: |
           printf "%b\n" "$CUSTOM_CONFIG" > config/custom.yaml
           echo "Use custom config: "
           cat config/custom.yaml
           uv run src/zotero_arxiv_daily/main.py
+
+      - name: Persist classics history
+        if: ${{ github.event_name == 'schedule' && vars.CLASSICS_ENABLED == 'true' }}
+        working-directory: classics-state
+        run: |
+          git add daily_classics.json
+          if git diff --cached --quiet; then
+            echo "No classics history change"
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Advance daily classics history'
+          git push origin HEAD:classics-state

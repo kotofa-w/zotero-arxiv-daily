@@ -1,6 +1,8 @@
 """Tests for zotero_arxiv_daily.executor: normalize_path_patterns, filter_corpus, fetch_zotero_corpus, E2E."""
 
 from datetime import datetime
+import csv
+import json
 
 import pytest
 from omegaconf import OmegaConf
@@ -97,6 +99,63 @@ def test_filter_corpus_no_filters_returns_all():
     ]
     filtered = executor.filter_corpus(corpus)
     assert filtered == corpus
+
+
+def test_split_classic_corpus_keeps_only_explicit_abstract_seeds(config):
+    executor = Executor.__new__(Executor)
+    executor.config = config
+    corpus = [
+        CorpusPaper("Reading", "reading abstract", datetime(2020, 1, 1), ["阅读"]),
+        CorpusPaper("Imported", "imported abstract", datetime(2026, 1, 1), ["学科经典"]),
+        CorpusPaper("Seed", "original abstract", datetime(2026, 1, 2), ["学科经典/兴趣种子"]),
+        CorpusPaper("No abstract", "  ", datetime(2026, 1, 3), ["学科经典/兴趣种子"]),
+    ]
+    personal, seeds = executor.split_classic_corpus(corpus)
+    assert [paper.title for paper in personal] == ["Reading"]
+    assert [paper.title for paper in seeds] == ["Seed"]
+
+
+def test_classic_only_email_advances_after_smtp_acceptance(config, monkeypatch, tmp_path):
+    from omegaconf import open_dict
+
+    catalog_path = tmp_path / "catalog.csv"
+    with catalog_path.open("w", encoding="utf-8", newline="") as target:
+        writer = csv.DictWriter(target, fieldnames=("area", "path", "title", "authors", "year", "venue", "doi", "stable_url"))
+        writer.writeheader()
+        writer.writerow({"area": "circuits", "path": "04 circuits", "title": "Classic", "authors": "A", "year": "1982", "venue": "IEEE", "doi": "10.1/classic", "stable_url": "https://doi.org/10.1/classic"})
+    state_path = tmp_path / "state.json"
+    state_path.write_text('{"version":1,"sent":[]}', encoding="utf-8")
+    with open_dict(config):
+        config.executor.send_empty = False
+        config.classics.enabled = True
+        config.classics.catalog_path = str(catalog_path)
+        config.classics.state_path = str(state_path)
+
+    executor = Executor.__new__(Executor)
+    executor.config = config
+    executor.fetch_zotero_corpus = lambda: [CorpusPaper("Seed", "Abstract", datetime(2026, 1, 1), [])]
+    executor.filter_corpus = lambda corpus: corpus
+    executor.retrievers = {}
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "schedule")
+    monkeypatch.setattr("zotero_arxiv_daily.executor.load_classic_guide", lambda *args: "<p>Guide</p>")
+
+    def reject(*args, **kwargs):
+        raise RuntimeError("SMTP failed")
+
+    monkeypatch.setattr("zotero_arxiv_daily.executor.send_email", reject)
+    with pytest.raises(RuntimeError, match="SMTP failed"):
+        executor.run()
+    assert json.loads(state_path.read_text(encoding="utf-8"))["sent"] == []
+
+    sent = []
+    monkeypatch.setattr("zotero_arxiv_daily.executor.send_email", lambda config, html, has_classic=False: sent.append((html, has_classic)))
+    executor.run()
+    assert len(sent) == 1 and sent[0][1] is True and "学科经典" in sent[0][0]
+    assert [entry["key"] for entry in json.loads(state_path.read_text(encoding="utf-8"))["sent"]] == ["10.1/classic"]
+
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "workflow_dispatch")
+    executor.run()
+    assert len(json.loads(state_path.read_text(encoding="utf-8"))["sent"]) == 1
 
 
 # ---------------------------------------------------------------------------
