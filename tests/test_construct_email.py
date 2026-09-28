@@ -83,6 +83,16 @@ def test_get_block_html_contains_all_fields():
     assert "MIT" in html
 
 
+def test_render_daily_guide_escapes_model_content():
+    paper = make_sample_paper(tldr="fallback", abstract_zh="译文 <tag>",
+                              guide="方法 **与** <script>", guide_basis="摘要")
+    html = render_email([paper])
+    assert "译文 &lt;tag&gt;" in html
+    assert "&lt;script&gt;" in html
+    assert "<script>" not in html
+    assert "导读（依据摘要）" in html
+
+
 def test_get_empty_html():
     html = get_empty_html()
     assert "No Papers Today" in html

@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 from .reranker import get_reranker_cls
 from .construct_email import render_email
 from .daily_classics import advance_state, load_catalog, load_state, save_state, select_classic
+from .classic_guide import load_classic_guide
 from .utils import send_email
 from openai import OpenAI
 from tqdm import tqdm
@@ -113,6 +114,7 @@ class Executor:
     
     def run(self):
         classic = None
+        classic_guide_html = None
         classic_context = None
         classic_config = self.config.get("classics")
         enabled = classic_config and str(classic_config.get("enabled", False)).lower() == "true"
@@ -125,6 +127,10 @@ class Executor:
             catalog = load_catalog(catalog_path)
             history = load_state(state_path)
             classic = select_classic(catalog, [entry["key"] for entry in history])
+            if classic is not None:
+                classic_guide_html = load_classic_guide(
+                    classic, root / "classics/guides/manifest.csv"
+                )
             classic_context = (catalog, history, state_path)
 
         corpus, classic_seeds = self.split_classic_corpus(self.fetch_zotero_corpus())
@@ -151,13 +157,13 @@ class Executor:
             reranked_papers = reranked_papers[:self.config.executor.max_paper_num]
             logger.info("Generating TLDR and affiliations...")
             for p in tqdm(reranked_papers):
-                p.generate_tldr(self.openai_client, self.config.llm)
+                p.generate_reading(self.openai_client, self.config.llm)
                 p.generate_affiliations(self.openai_client, self.config.llm)
         elif not self.config.executor.send_empty and classic is None:
             logger.info("No new papers found. No email will be sent.")
             return
         logger.info("Sending email...")
-        email_content = render_email(reranked_papers, classic)
+        email_content = render_email(reranked_papers, classic, classic_guide_html)
         if classic is not None:
             logger.info(f"Selected classic: {classic.doi or classic.url}")
         send_email(self.config, email_content, has_classic=classic is not None)

@@ -85,6 +85,37 @@ def test_invalid_api_mode_falls_back_to_abstract(llm_params):
     assert paper.generate_tldr(make_stub_openai_client(), llm_params) == paper.abstract
 
 
+def test_daily_reading_translates_and_guides_in_one_request(llm_params):
+    from types import SimpleNamespace
+
+    calls = []
+    def create(**kwargs):
+        calls.append(kwargs)
+        content = '{"abstract_zh":"中文摘要","guide":"问题、方法、结果与限制"}'
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    paper = make_sample_paper(full_text="Full text preview")
+    paper.generate_reading(client, llm_params)
+    assert len(calls) == 1
+    assert paper.abstract_zh == "中文摘要"
+    assert paper.guide == "问题、方法、结果与限制"
+    assert paper.guide_basis == "摘要与正文节选"
+
+
+def test_daily_reading_falls_back_per_paper_on_invalid_response(llm_params):
+    from types import SimpleNamespace
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(
+        create=lambda **kwargs: SimpleNamespace(choices=[SimpleNamespace(
+            message=SimpleNamespace(content="not JSON"))])
+    )))
+    paper = make_sample_paper()
+    paper.generate_reading(client, llm_params)
+    assert paper.tldr == paper.abstract
+    assert paper.abstract_zh is None and paper.guide is None
+
+
 # ---------------------------------------------------------------------------
 # generate_affiliations
 # ---------------------------------------------------------------------------

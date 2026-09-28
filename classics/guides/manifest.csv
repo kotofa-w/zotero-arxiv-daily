@@ -1,0 +1,67 @@
+order,identifier,title,status,guide_path,source_url
+1,10.1145/360018.360022,Computer science as empirical inquiry,draft,01-computer-science-as-empirical-inquiry.md,https://www.contrib.andrew.cmu.edu/~kk3n/80-300/newell-simon1976.pdf
+2,10.1038/323533a0,Learning representations by back-propagating errors,draft,02-learning-representations-by-back-propagating-errors.md,https://www.nature.com/articles/323533a0.pdf
+3,10.1109/5.18626,A tutorial on hidden Markov models and selected applications in speech recognition,draft,03-hmm-tutorial.md,https://www.cs.cmu.edu/~cga/behavior/rabiner1.pdf
+4,10.1007/bf00992698,Q-learning,draft,04-q-learning.md,https://link.springer.com/content/pdf/10.1007/BF00992698.pdf
+5,10.1007/bf00994018,Support-vector networks,draft,05-support-vector-networks.md,https://link.springer.com/content/pdf/10.1007/BF00994018.pdf
+6,10.1023/a:1018054314350,Bagging Predictors,draft,06-bagging-predictors.md,https://link.springer.com/content/pdf/10.1023/A:1018054314350.pdf
+7,10.1162/neco.1997.9.8.1735,Long Short-Term Memory,draft,07-long-short-term-memory.md,https://www.bioinf.jku.at/publications/older/2604.pdf
+8,10.1214/aos/1013203451,Greedy function approximation: A gradient boosting machine.,draft,08-greedy-function-approximation-gradient-boosting-machine.md,https://projecteuclid.org/journals/annals-of-statistics/volume-29/issue-5/Greedy-function-approximation-A-gradient-boosting-machine/10.1214/aos/1013203451.full
+9,10.1023/a:1010933404324,Random Forests,draft,09-random-forests.md,https://link.springer.com/article/10.1023/A:1010933404324
+10,10.1038/nature14236,Human-level control through deep reinforcement learning,draft,10-human-level-control-through-deep-reinforcement-learning.md,https://www.nature.com/articles/nature14236
+11,10.1038/nature16961,Mastering the game of Go with deep neural networks and tree search,draft,11-mastering-the-game-of-go-with-deep-neural-networks-and-tree-search.md,https://www.nature.com/articles/nature16961
+12,https://proceedings.neurips.cc/paper_files/paper/2020/hash/1457c0d6bfcb4967418bfb8ac142f64a-abstract.html,Language Models are Few-Shot Learners,draft,12-language-models-are-few-shot-learners.md,https://proceedings.neurips.cc/paper_files/paper/2020/hash/1457c0d6bfcb4967418bfb8ac142f64a-Abstract.html
+13,10.1162/neco.1989.1.4.541,Backpropagation Applied to Handwritten Zip Code Recognition,draft,13-backpropagation-applied-to-handwritten-zip-code-recognition.md,"https://api.openalex.org/works/https://doi.org/10.1162/neco.1989.1.4.541?select=doi,title,abstract_inverted_index"
+14,10.1109/5.726791,Gradient-based learning applied to document recognition,draft,14-gradient-based-learning-applied-to-document-recognition.md,https://ieeexplore.ieee.org/document/726791
+15,10.1162/neco.2006.18.7.1527,A Fast Learning Algorithm for Deep Belief Nets,draft,15-a-fast-learning-algorithm-for-deep-belief-nets.md,https://direct.mit.edu/neco/article/18/7/1527/7065/A-Fast-Learning-Algorithm-for-Deep-Belief-Nets
+16,10.1126/science.1127647,Reducing the Dimensionality of Data with Neural Networks,draft,16-reducing-the-dimensionality-of-data-with-neural-networks.md,"https://api.openalex.org/works/https://doi.org/10.1126/science.1127647?select=doi,title,abstract_inverted_index"
+17,https://proceedings.neurips.cc/paper_files/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-abstract.html,ImageNet Classification with Deep Convolutional Neural Networks,draft,17-imagenet-classification-with-deep-convolutional-neural-networks.md,https://proceedings.neurips.cc/paper_files/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html
+18,https://proceedings.neurips.cc/paper_files/paper/2013/hash/9aa42b31882ec039965f3c4923ce901b-abstract.html,Distributed Representations of Words and Phrases and their Compositionality,draft,18-distributed-representations-of-words-and-phrases-and-their-compositionality.md,https://proceedings.neurips.cc/paper_files/paper/2013/hash/9aa42b31882ec039965f3c4923ce901b-Abstract.html
+19,https://proceedings.neurips.cc/paper_files/paper/2014/hash/f033ed80deb0234979a61f95710dbe25-abstract.html,Generative Adversarial Nets,draft,19-generative-adversarial-nets.md,https://proceedings.neurips.cc/paper_files/paper/2014/hash/f033ed80deb0234979a61f95710dbe25-Abstract.html
+20,https://proceedings.neurips.cc/paper_files/paper/2014/hash/5a18e133cbf9f257297f410bb7eca942-abstract.html,Sequence to Sequence Learning with Neural Networks,draft,20-sequence-to-sequence-learning-with-neural-networks.md,https://proceedings.neurips.cc/paper_files/paper/2014/hash/5a18e133cbf9f257297f410bb7eca942-Abstract.html
+21,https://proceedings.mlr.press/v37/ioffe15.html,Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift,draft,21-batch-normalization-accelerating-deep-network-training.md,https://proceedings.mlr.press/v37/ioffe15.html
+22,10.1109/cvpr.2016.90,Deep Residual Learning for Image Recognition,draft,22-deep-residual-learning-for-image-recognition.md,https://ieeexplore.ieee.org/document/7780459
+23,https://proceedings.neurips.cc/paper_files/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-abstract.html,Attention is All you Need,draft,23-attention-is-all-you-need.md,https://proceedings.neurips.cc/paper_files/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html
+24,10.18653/v1/n19-1423,BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,draft,24-bert-pre-training-of-deep-bidirectional-transformers-for-language-understanding.md,https://aclanthology.org/N19-1423/
+25,https://proceedings.neurips.cc/paper_files/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-abstract.html,Denoising Diffusion Probabilistic Models,draft,25-denoising-diffusion-probabilistic-models.md,https://proceedings.neurips.cc/paper_files/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html
+26,https://proceedings.mlr.press/v139/radford21a.html,Learning Transferable Visual Models From Natural Language Supervision,draft,26-learning-transferable-visual-models-from-natural-language-supervision.md,https://proceedings.mlr.press/v139/radford21a.html
+27,10.1109/cvpr52688.2022.01042,High-Resolution Image Synthesis with Latent Diffusion Models,draft,27-high-resolution-image-synthesis-with-latent-diffusion-models.md,https://ieeexplore.ieee.org/document/9878449
+28,10.1145/641914.641917,The case for the reduced instruction set computer,draft,28-case-for-the-reduced-instruction-set-computer.md,https://www.cs.utexas.edu/~fussell/courses/cs352h/papers/risc.pdf
+29,10.1145/237090.237140,The case for a single-chip multiprocessor,draft,29-case-for-a-single-chip-multiprocessor.md,https://dl.acm.org/doi/pdf/10.1145/237090.237140
+30,10.1145/268806.268810,"The SimpleScalar tool set, version 2.0",draft,30-simplescalar-tool-set-version-2.md,https://dl.acm.org/doi/pdf/10.1145/268806.268810
+31,10.1145/285930.286007,The Stanford FLASH multiprocessor,draft,31-stanford-flash-multiprocessor.md,http://csl.cs.ucf.edu/~heinrich/papers/ISCA94.pdf
+32,10.1145/1165389.945450,The Google file system,draft,32-google-file-system.md,https://doi.org/10.1145/1165389.945450
+33,10.1145/1498765.1498785,Roofline,draft,33-roofline.md,https://www.osti.gov/servlets/purl/1407073
+34,10.1145/2000064.2000108,Dark silicon and the end of multicore scaling,draft,34-dark-silicon-and-the-end-of-multicore-scaling.md,https://doi.org/10.1145/2000064.2000108
+35,10.1145/3079856.3080246,In-Datacenter Performance Analysis of a Tensor Processing Unit,draft,35-in-datacenter-performance-analysis-of-a-tensor-processing-unit.md,https://doi.org/10.1145/3079856.3080246
+36,10.1145/3154484,A domain-specific architecture for deep neural networks,draft,36-domain-specific-architecture-for-deep-neural-networks.md,https://dl.acm.org/doi/pdf/10.1145/3154484
+37,10.1109/pgec.1964.263830,A Suggestion for a Fast Multiplier,draft,37-suggestion-for-a-fast-multiplier.md,https://doi.org/10.1109/pgec.1964.263830
+38,10.1109/tc.1973.5009159,A Parallel Algorithm for the Efficient Solution of a General Class of Recurrence Equations,draft,38-kogge-stone-parallel-recurrence-algorithm.md,https://doi.org/10.1109/TC.1973.5009159
+39,10.1109/tc.1982.1675982,A Regular Layout for Parallel Adders,draft,39-regular-layout-for-parallel-adders.md,https://doi.org/10.1109/TC.1982.1675982
+40,10.1109/4.126534,Low-power CMOS digital design,draft,40-low-power-cmos-digital-design.md,https://doi.org/10.1109/4.126534
+41,10.1109/16.887014,FinFET-a self-aligned double-gate MOSFET scalable to 20 nm,draft,41-finfet-self-aligned-double-gate-mosfet.md,https://doi.org/10.1109/16.887014
+42,10.1109/micro.2003.1253179,Razor: a low-power pipeline based on circuit-level timing speculation,draft,42-razor-low-power-pipeline-timing-speculation.md,https://doi.org/10.1109/MICRO.2003.1253179
+43,10.1155/2014/365689,FinFETs: From Devices to Architectures,draft,43-finfets-from-devices-to-architectures.md,https://downloads.hindawi.com/archive/2014/365689.pdf
+44,10.1109/dac.1982.1585498,A Linear-Time Heuristic for Improving Network Partitions,draft,44-linear-time-heuristic-for-improving-network-partitions.md,https://doi.org/10.1109/DAC.1982.1585498
+45,10.1109/tc.1986.1676819,Graph-Based Algorithms for Boolean Function Manipulation,draft,45-graph-based-algorithms-for-boolean-function-manipulation.md,https://doi.org/10.1109/TC.1986.1676819
+46,10.1109/dac.1986.1586125,TimberWolf3.2: A New Standard Cell Placement and Global Routing Package,draft,46-timberwolf32-placement-global-routing.md,https://doi.org/10.1109/DAC.1986.1586125
+47,10.1109/iccad.1996.569607,GRASP-A new search algorithm for satisfiability,draft,47-grasp-sat-search-algorithm.md,https://doi.org/10.1109/ICCAD.1996.569607
+48,10.1145/378239.379017,Chaff,draft,48-chaff.md,https://dl.acm.org/doi/10.1145/378239.379017
+49,10.1145/981066.981072,FastPlace,draft,49-fastplace.md,https://dl.acm.org/doi/10.1145/981066.981072
+50,10.1145/1960397.1960429,The ISPD-2011 routability-driven placement contest and benchmark suite,draft,50-ispd-2011-routability-placement-contest.md,https://dl.acm.org/doi/10.1145/1960397.1960429
+51,10.1109/vlsi-dat49148.2020.9196319,Overview of the OpenROAD Digital Design Flow from RTL to GDS,draft,51-openroad-rtl-to-gds.md,https://ieeexplore.ieee.org/document/9196319
+52,10.1038/s41586-021-03544-w,A graph placement methodology for fast chip design,draft,52-graph-placement-methodology.md,https://scalingintelligence.stanford.edu/pubs/gpm/
+53,10.1109/micro.2014.58,DaDianNao: A Machine-Learning Supercomputer,draft,53-dadiannao.md,https://ieeexplore.ieee.org/document/6987625
+54,10.1145/2541940.2541967,DianNao,draft,54-diannao.md,https://dl.acm.org/doi/10.1145/2541940.2541967
+55,10.1145/2694344.2694358,PuDianNao,draft,55-pudiannao.md,https://dl.acm.org/doi/10.1145/2694344.2694358
+56,10.1109/micro.2016.7783723,Cambricon-X: An accelerator for sparse neural networks,draft,56-cambricon-x.md,https://ieeexplore.ieee.org/document/7783723
+57,10.1109/isca.2016.40,Eyeriss: A Spatial Architecture for Energy-Efficient Dataflow for Convolutional Neural Networks,draft,57-eyeriss-isca.md,https://ieeexplore.ieee.org/document/7510849
+58,10.1145/3079856.3080254,SCNN,draft,58-scnn.md,https://dl.acm.org/doi/10.1145/3079856.3080254
+59,10.1145/3173162.3173176,MAERI,draft,59-maeri.md,https://dl.acm.org/doi/10.1145/3173162.3173176
+60,10.1109/jetcas.2019.2910232,Eyeriss v2: A Flexible Accelerator for Emerging Deep Neural Networks on Mobile Devices,draft,60-eyeriss-v2.md,https://ieeexplore.ieee.org/document/8701703
+61,10.1021/nl901874j,Memristor−CMOS Hybrid Integrated Circuits for Reconfigurable Logic,draft,61-memristor-cmos-hybrid-logic.md,https://pubs.acs.org/doi/10.1021/nl901874j
+62,10.1109/isca.2016.12,ISAAC: A Convolutional Neural Network Accelerator with In-Situ Analog Arithmetic in Crossbars,draft,62-isaac.md,https://ieeexplore.ieee.org/document/7551379
+63,10.1109/isca.2016.13,PRIME: A Novel Processing-in-Memory Architecture for Neural Network Computation in ReRAM-Based Main Memory,draft,63-prime.md,https://ieeexplore.ieee.org/document/7551378
+64,10.1038/s41928-018-0092-2,In-memory computing with resistive switching devices,draft,64-in-memory-computing-resistive-switching-review.md,https://www.nature.com/articles/s41928-018-0092-2
+65,10.1109/vlsit.2018.8510687,XNOR-SRAM: In-Memory Computing SRAM Macro for Binary/Ternary Deep Neural Networks,draft,65-xnor-sram.md,https://ieeexplore.ieee.org/document/8510687
+66,10.1038/s41586-022-04992-8,A compute-in-memory chip based on resistive random-access memory,draft,66-reram-compute-in-memory-chip.md,https://www.nature.com/articles/s41586-022-04992-8

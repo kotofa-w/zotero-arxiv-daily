@@ -48,6 +48,54 @@ class Paper:
     tldr: Optional[str] = None
     affiliations: Optional[list[str]] = None
     score: Optional[float] = None
+    abstract_zh: Optional[str] = None
+    guide: Optional[str] = None
+    guide_basis: Optional[str] = None
+
+    def generate_reading(self, openai_client: OpenAI, llm_params: dict) -> None:
+        """Translate the abstract and write a short guide in one model request."""
+        if not self.abstract or not self.abstract.strip():
+            self.tldr = self.abstract
+            return
+
+        prompt = f"Title: {self.title}\n\nOriginal abstract:\n{self.abstract}\n"
+        basis = "摘要"
+        if self.full_text:
+            enc = tiktoken.encoding_for_model("gpt-4o")
+            preview = enc.decode(enc.encode(self.full_text)[:2000])
+            prompt += f"\nBeginning of full text (excerpt only):\n{preview}\n"
+            basis = "摘要与正文节选"
+        prompt += (
+            "\nReturn only a JSON object with two nonempty string fields: "
+            "abstract_zh and guide. Translate the complete original abstract faithfully "
+            "into Chinese in abstract_zh, preserving numbers, uncertainty and limitations. "
+            "In guide, write 150-300 Chinese characters covering the research question, "
+            "method, reported evidence and limitations, and what to look for when reading. "
+            "Use only the supplied paper text. Do not invent findings or present an "
+            "IC-design reading extension as a finding of the paper."
+        )
+        try:
+            response = _request_llm(
+                openai_client, llm_params,
+                [{"role": "system", "content": "You translate and explain research papers accurately. Return only valid JSON."},
+                 {"role": "user", "content": prompt}],
+            )
+            data = json.loads(response)
+            if not isinstance(data, dict) or any(
+                not isinstance(data.get(field), str) or not data[field].strip()
+                for field in ("abstract_zh", "guide")
+            ):
+                raise ValueError("Incomplete daily reading response")
+            self.abstract_zh = data["abstract_zh"].strip()
+            self.guide = data["guide"].strip()
+            self.guide_basis = basis
+            self.tldr = self.abstract_zh
+        except Exception as e:
+            logger.warning(f"Failed to generate daily reading of {self.url}: {e}")
+            self.abstract_zh = None
+            self.guide = None
+            self.guide_basis = None
+            self.tldr = self.abstract
 
     def _generate_tldr_with_llm(self, openai_client:OpenAI,llm_params:dict) -> str:
         lang = llm_params.get('language', 'English')
