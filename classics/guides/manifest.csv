@@ -65,3 +65,4 @@ order,identifier,title,status,guide_path,source_url
 64,10.1038/s41928-018-0092-2,In-memory computing with resistive switching devices,draft,64-in-memory-computing-resistive-switching-review.md,https://www.nature.com/articles/s41928-018-0092-2
 65,10.1109/vlsit.2018.8510687,XNOR-SRAM: In-Memory Computing SRAM Macro for Binary/Ternary Deep Neural Networks,draft,65-xnor-sram.md,https://ieeexplore.ieee.org/document/8510687
 66,10.1038/s41586-022-04992-8,A compute-in-memory chip based on resistive random-access memory,draft,66-reram-compute-in-memory-chip.md,https://www.nature.com/articles/s41586-022-04992-8
+67,10.1109/JPROC.2017.2761740,Efficient Processing of Deep Neural Networks: A Tutorial and Survey,draft,67-efficient-processing-of-dnns-survey.md,https://ieeexplore.ieee.org/document/8114708/
