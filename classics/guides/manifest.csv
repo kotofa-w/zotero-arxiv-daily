@@ -66,3 +66,7 @@ order,identifier,title,status,guide_path,source_url
 65,10.1109/vlsit.2018.8510687,XNOR-SRAM: In-Memory Computing SRAM Macro for Binary/Ternary Deep Neural Networks,draft,65-xnor-sram.md,https://ieeexplore.ieee.org/document/8510687
 66,10.1038/s41586-022-04992-8,A compute-in-memory chip based on resistive random-access memory,draft,66-reram-compute-in-memory-chip.md,https://www.nature.com/articles/s41586-022-04992-8
 67,10.1109/JPROC.2017.2761740,Efficient Processing of Deep Neural Networks: A Tutorial and Survey,draft,67-efficient-processing-of-dnns-survey.md,https://ieeexplore.ieee.org/document/8114708/
+68,10.1613/jair.301,Reinforcement Learning: A Survey,draft,68-reinforcement-learning-survey.md,https://www.jair.org/index.php/jair/article/view/10166
+69,10.1038/nature14539,Deep learning,draft,69-deep-learning-review.md,https://www.nature.com/articles/nature14539
+70,10.1145/3451179,Machine Learning for Electronic Design Automation: A Survey,draft,70-machine-learning-for-eda-survey.md,https://researchportal.hkust.edu.hk/en/publications/machine-learning-for-electronic-design-automation-a-survey/
+71,10.1109/MSP.2009.934110,A survey of multicore processors,draft,71-multicore-processors-survey.md,https://ieeexplore.ieee.org/document/5230801/
