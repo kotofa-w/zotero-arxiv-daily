@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "zotero-arxiv-daily"
 version = "1.0.0"
-description = "Add your description here"
+description = "Zotero-based paper recommendations with Chinese reading guides and a curated classics path"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
