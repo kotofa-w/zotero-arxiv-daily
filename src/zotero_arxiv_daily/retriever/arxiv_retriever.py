@@ -182,8 +182,8 @@ class ArxivRetriever(BaseRetriever):
                         wait = batch_retry_delay * (attempt + 1)
                         logger.warning(f"arXiv API 429 on batch {i // 20}, retry {attempt + 1}/{max_batch_retries} in {wait}s")
                         sleep(wait)
-                    elif exc.status == 406:
-                        logger.warning(f"arXiv API 406 on batch {i // 20}; using RSS metadata")
+                    elif exc.status == 406 or 500 <= exc.status < 600:
+                        logger.warning(f"arXiv API {exc.status} on batch {i // 20}; using RSS metadata")
                         fallback = [_result_from_rss(rss_entries[paper_id]) for paper_id in all_paper_ids[i:i + 20]]
                         raw_papers.extend(fallback)
                         bar.update(len(fallback))
