@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import feedparser
 import arxiv
+import pytest
 
 from zotero_arxiv_daily.retriever.arxiv_retriever import ArxivRetriever, _run_with_hard_timeout
 import zotero_arxiv_daily.retriever.arxiv_retriever as arxiv_retriever
@@ -64,14 +65,15 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
     assert set(p.title for p in papers) == set(e.title for e in new_entries)
 
 
-def test_arxiv_406_uses_rss_metadata(config, mock_feedparser, monkeypatch):
+@pytest.mark.parametrize("status", [406, 500, 502, 503, 504, 599])
+def test_arxiv_unavailable_uses_rss_metadata(config, mock_feedparser, monkeypatch, status):
     """A rejected batch must not discard papers already present in the RSS feed."""
     class RejectingClient:
         def __init__(self, **kwargs):
             pass
 
         def results(self, search):
-            raise arxiv.HTTPError("https://export.arxiv.org/api/query", 1, 406)
+            raise arxiv.HTTPError("https://export.arxiv.org/api/query", 1, status)
 
     monkeypatch.setattr(arxiv_retriever.arxiv, "Client", RejectingClient)
     monkeypatch.setattr(arxiv_retriever, "sleep", lambda _: None)
@@ -87,6 +89,23 @@ def test_arxiv_406_uses_rss_metadata(config, mock_feedparser, monkeypatch):
     assert papers[0].authors[0].name == expected[0].author.split(",", 1)[0]
     assert papers[0].entry_id == expected[0].link
     assert papers[0].pdf_url == expected[0].link.replace("/abs/", "/pdf/")
+
+
+@pytest.mark.parametrize("status", [400, 403, 404, 600])
+def test_arxiv_other_http_errors_propagate(config, mock_feedparser, monkeypatch, status):
+    class RejectingClient:
+        def __init__(self, **kwargs):
+            pass
+
+        def results(self, search):
+            raise arxiv.HTTPError("https://export.arxiv.org/api/query", 1, status)
+
+    monkeypatch.setattr(arxiv_retriever.arxiv, "Client", RejectingClient)
+    monkeypatch.setattr(arxiv_retriever, "sleep", lambda _: None)
+
+    with pytest.raises(arxiv.HTTPError) as error:
+        ArxivRetriever(config)._retrieve_raw_papers()
+    assert error.value.status == status
 
 
 def test_run_with_hard_timeout_returns_value():
