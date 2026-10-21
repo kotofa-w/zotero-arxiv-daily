@@ -56,13 +56,23 @@ executor:
 
 `${oc.env:NAME}` 从环境变量取值。完整可配置项见 [`config/base.yaml`](config/base.yaml)；配置覆盖顺序见 [`config/default.yaml`](config/default.yaml)。不要把真实密钥写入仓库文件。
 
-在 **Actions → Test → Run workflow** 手动检查邮件路径。Test 是调试运行，会取测试论文，并且不会推进经典历史。正式的 [`Send emails daily`](.github/workflows/main.yml) 默认在每天 **22:00 UTC** 启动；周末或节假日可能没有新的 arXiv 论文。工作流日志中的 SMTP 接受只证明发信服务器接收了邮件，收件箱投递仍需在邮箱核对。
+在 **Actions → Test → Run workflow** 手动检查邮件路径。Test 是调试运行，会取测试论文，并且不会推进经典历史。正式的 [`Send emails daily`](.github/workflows/main.yml) 计划在每天 **20:00 UTC（香港时间次日 04:00）** 触发，GitHub Actions 可能延迟执行；周末或节假日可能没有新的 arXiv 论文。工作流日志中的 SMTP 接受只证明发信服务器接收了邮件，收件箱投递仍需在邮箱核对。
 
 ## 启用每日经典
 
 经典栏目默认关闭。启用前，应在 fork 中创建 `classics-state` 分支，并在分支根目录放入 `daily_classics.json`；初始内容可参考 [`classics/state.example.json`](classics/state.example.json)。随后将 Actions Variable `CLASSICS_ENABLED` 设为 `true`。计划工作流会检出该分支，在 SMTP 接受邮件后提交发送历史。若状态分支缺失，启用后的工作流会在检出阶段失败。
 
-手动运行 **Actions → Test** 并选中 `preview_classics`，可试发包含经典栏目的邮件；这次运行不会写入发送历史。`preview_daily_reading` 则生成不发邮件的中文导读 HTML 预览。经典推荐不依赖将 71 篇目录导入个人 Zotero；若个人库里有 `学科经典` 集合，该集合不计入普通阅读排序，只有直接位于 `学科经典/兴趣种子` 且有原始摘要的文献可提供有限的兴趣种子权重。路径和上限见 [`config/base.yaml`](config/base.yaml)。
+在 **Actions → Test → Run workflow** 中按用途选择输入：
+
+| `preview_classics` | `preview_daily_reading` | 行为 |
+| --- | --- | --- |
+| `false` | `false` | 在 `main` 分支试发测试论文邮件 |
+| `true` | `false` | 试发包含经典栏目的邮件，需已准备 `classics-state` 分支 |
+| `false` | `true` | 生成中文导读 HTML，并保存为 `daily-reading-preview` artifact，不发邮件 |
+
+这些手动运行均不推进经典发送历史。**不要同时勾选两个输入**：当前工作流的条件会跳过所有任务，不能用该组合验证成功。HTML 预览仍会调用配置的模型 API，可能产生费用。
+
+经典推荐不依赖将 71 篇目录导入个人 Zotero；若个人库里有 `学科经典` 集合，该集合不计入普通阅读排序，只有直接位于 `学科经典/兴趣种子` 且有原始摘要的文献可提供有限的兴趣种子权重。路径和上限见 [`config/base.yaml`](config/base.yaml)。
 
 ## 本地运行
 
@@ -72,7 +82,22 @@ executor:
 uv run src/zotero_arxiv_daily/main.py
 ```
 
-本地启用经典时，还需提供 `classics-state/daily_classics.json`，并设置 `CLASSICS_ENABLED=true`。本地运行不会以计划任务身份自动推进历史。只检查中文导读生成、且不连接 Zotero 或 SMTP 时，可运行 `uv run python -m zotero_arxiv_daily.preview_daily_reading`；它使用仓库中的示例论文并生成 `daily-reading-preview.html`。
+本地启用经典时，还需提供 `classics-state/daily_classics.json`，并设置 `CLASSICS_ENABLED=true`。本地运行不会以计划任务身份自动推进历史。只检查中文导读生成、且不连接 Zotero 或 SMTP 时，可运行 `uv run python -m zotero_arxiv_daily.preview_daily_reading`；它使用仓库中的示例论文并生成 `daily-reading-preview.html`，仍需有效的模型 API 配置，不是离线预览。
+
+## 开发检查与排查
+
+在仓库根目录运行默认测试：
+
+```bash
+uv run pytest
+```
+
+默认排除标记为 `slow` 的测试；[CI](.github/workflows/ci.yml) 使用 `uv run pytest -m "" --cov=src/zotero_arxiv_daily --cov-report=term-missing` 覆盖包含慢测试的完整集合。首次安装依赖或使用本地排序模型可能需要下载；本地执行主程序会访问配置的服务并可能发送邮件，和测试命令不同。
+
+- 计划任务未准时开始：先看 Actions 的实际运行时间；cron 是触发计划，不能保证邮件在指定分钟到达。
+- 日报没有新论文：检查选择的文献源、分类、Zotero 摘要与日期范围；周末或节假日可能没有新的 arXiv 论文。
+- 启用经典后检出失败：确认 `classics-state` 分支及根目录 `daily_classics.json` 已建立，并允许工作流写入状态分支。
+- SMTP 已接受但未收到邮件：核对收件地址、垃圾邮件及邮件服务商投递状态。Actions 成功和 SMTP 接受均不等于收件箱已送达。
 
 ## 项目结构与边界
 
