@@ -56,7 +56,7 @@ executor:
 
 `${oc.env:NAME}` 从环境变量取值。完整可配置项见 [`config/base.yaml`](config/base.yaml)；配置覆盖顺序见 [`config/default.yaml`](config/default.yaml)。不要把真实密钥写入仓库文件。
 
-在 **Actions → Test → Run workflow** 手动检查邮件路径。Test 是调试运行，会取测试论文，并且不会推进经典历史。正式的 [`Send emails daily`](.github/workflows/main.yml) 计划在每天 **20:00 UTC（香港时间次日 04:00）** 触发，GitHub Actions 可能延迟执行；周末或节假日可能没有新的 arXiv 论文。工作流日志中的 SMTP 接受只证明发信服务器接收了邮件，收件箱投递仍需在邮箱核对。
+在 **Actions → Test → Run workflow** 手动检查邮件路径。Test 是调试运行，会取测试论文，并且不会推进经典历史。正式的 [`Send emails daily`](.github/workflows/main.yml) 计划在每天 **20:17 UTC（香港时间次日 04:17）** 触发，GitHub Actions 可能延迟执行；周末或节假日可能没有新的 arXiv 论文。工作流日志中的 SMTP 接受只证明发信服务器接收了邮件，收件箱投递仍需在邮箱核对。
 
 ## 启用每日经典
 
